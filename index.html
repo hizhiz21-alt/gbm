@@ -244,13 +244,13 @@ button{
       <label>背景画像（読み込み：最優先）</label>
       <input type="file" id="bgFile" accept="image/*">
       <label class="miniLabel">背景ファイル名（bg/ から。例：bg1.jpg）</label>
-      <input type="text" id="bgPath" placeholder="例: bg1.jpg">
+      <select id="bgPath"></select>
     </div>
     <div>
       <label>立ち絵（読み込み：最優先）</label>
       <input type="file" id="charaFile" accept="image/*">
       <label class="miniLabel">立ち絵ファイル名（chara/ から。例：zk.png）</label>
-      <input type="text" id="charaPath" placeholder="例: zk.png">
+      <select id="charaPath"></select>
     </div>
   </div>
 
@@ -433,6 +433,20 @@ miniBtn.addEventListener("click", () => {
   miniBtn.style.display = "none";
   elHint.style.display = "none";
 });
+
+// === auto fill selects from list.json ===
+async function __loadList(p){
+  try{ const r=await fetch(p,{cache:"no-store"}); return r.ok?await r.json():[] }catch(e){ return [] }
+}
+function __fill(sel, arr){
+  sel.innerHTML = '<option value="">（なし）</option>';
+  arr.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+}
+(async()=>{
+  if (window.bgPath) __fill(bgPath, await __loadList('./bg/list.json'));
+  if (window.charaPath) __fill(charaPath, await __loadList('./chara/list.json'));
+})();
+
 </script>
 </body>
 </html>
