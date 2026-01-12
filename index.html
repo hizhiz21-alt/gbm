@@ -243,24 +243,17 @@ button{
   opacity:.85;
 }
 
-#next{
-  position:absolute;
-  right:54px;
-  bottom:48px;
-  width:500px;   /* ← ここで大きさを変えられます */
-  height:500px;  /* 例：64px→96pxで1.5倍 */
-}
-
-#nextImg{
-  transform: scale(3);
-}
 
 
-/* FIX: next button size & position */
-#nextImg{
-  width:96px;
+
+
+
+/* === CLEAN FIX: next/hint icon === */
+.hint img{
+  width:32px;          /* modest size */
   height:auto;
-  margin-top:-20px;
+  display:block;
+  transform: translateY(-6px); /* slightly higher */
 }
 
 </style>
@@ -279,7 +272,7 @@ button{
       <img class="window-img" id="windowImg" src="./parts-sf4d7619aab.jpg" alt="">
       <div class="name" id="nameLayer"></div>
       <div class="text" id="textLayer"></div>
-      <div class="hint" id="hint"><img id="nextImg" src="./next.png" alt="next" width="300" height="300">
+      <div class="hint" id="hint"><img id="nextImg" src="./next.png" alt="next">
 </div>
     </div>
   </div>
