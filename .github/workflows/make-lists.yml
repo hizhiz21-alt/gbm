@@ -1,0 +1,36 @@
+name: make image lists
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate lists
+        run: |
+          python - << 'PY'
+          import os, json
+          exts = (".png",".jpg",".jpeg",".webp",".gif")
+          for d in ("bg","chara"):
+            os.makedirs(d, exist_ok=True)
+            files = [f for f in os.listdir(d) if f.lower().endswith(exts)]
+            files.sort()
+            with open(os.path.join(d, "list.json"), "w", encoding="utf-8") as fp:
+              json.dump(files, fp, ensure_ascii=False)
+          PY
+
+      - name: Commit lists
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add bg/list.json chara/list.json
+          git commit -m "auto: update image lists" || exit 0
+          git push
