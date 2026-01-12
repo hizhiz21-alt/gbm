@@ -30,11 +30,28 @@ html, body{
   background:#000;
 }
 
+
+/* ===== ヘッダー（追加） ===== */
+#header{
+  position:fixed;
+  left:0; right:0; top:0;
+  z-index:10;
+  pointer-events:none;
+}
+#header img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+/* ヘッダー下を背景に被せる量（追加） */
+:root{ --headerOverlap: 60px; }
+
 /* ===== 背景＋立ち絵の表示領域（ウインドウ分を引く） ===== */
 #scene{
   position:absolute;
-  left:0; right:0; top:0;
-  height:calc(100vh - var(--uiH, 0px));
+  left:0; right:0; top:calc(-1 * var(--headerOverlap, 60px));
+  height:calc(100vh - var(--uiH, 0px) + var(--headerOverlap, 60px));
   overflow:hidden;
 }
 
@@ -134,6 +151,13 @@ html, body{
   animation:blink 1.2s infinite ease-in-out;
   z-index:2;
 }
+
+.hint img{
+  width:28px;
+  height:auto;
+  display:block;
+}
+
 @keyframes blink{
   0%,100%{opacity:.25; transform:translateY(0)}
   50%{opacity:1; transform:translateY(-2px)}
@@ -221,6 +245,7 @@ button{
 
 <body>
 <div id="stage">
+  <div id="header"><img id="headerImg" src="./header.png" alt=""></div>
   <div id="scene">
     <div class="bg" id="bg"></div>
     <img class="chara" id="chara" alt="">
@@ -231,7 +256,7 @@ button{
       <img class="window-img" id="windowImg" src="./parts-sf4d7619aab.jpg" alt="">
       <div class="name" id="nameLayer"></div>
       <div class="text" id="textLayer"></div>
-      <div class="hint" id="hint">▼</div>
+      <div class="hint" id="hint"><img id="nextImg" src="./next.png" alt="next"></div>
     </div>
   </div>
 
