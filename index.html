@@ -241,15 +241,15 @@ button{
 <div id="editor">
   <div class="row">
     <div>
-      <label>背景画像（読み込み：最優先）</label>
+      <label>背景画像（読み込み優先）</label>
       <input type="file" id="bgFile" accept="image/*">
-      <label class="miniLabel">背景ファイル名（bg/ から。例：bg1.jpg）</label>
+      <label class="miniLabel">背景ファイル名</label>
       <select id="bgPath"></select>
     </div>
     <div>
-      <label>立ち絵（読み込み：最優先）</label>
+      <label>立ち絵（読み込み優先）</label>
       <input type="file" id="charaFile" accept="image/*">
-      <label class="miniLabel">立ち絵ファイル名（chara/ から。例：zk.png）</label>
+      <label class="miniLabel">立ち絵ファイル名</label>
       <select id="charaPath"></select>
     </div>
   </div>
@@ -260,25 +260,27 @@ button{
       <input type="text" id="nameInput" value="ジークフリート">
     </div>
     <div>
-      <label>（保険）フォント選択</label>
+      <label>フォント選択</label>
       <input type="file" id="fontFile" accept=".otf,.ttf,application/font-sfnt,font/otf,font/ttf">
     </div>
   </div>
 
   <label>メッセージ（--- で区切り）</label>
-  <textarea id="msgInput">年が明けたな。
-今年もおまえと、
-切磋琢磨していきたいものだ。
+  <textarea id="msgInput">誕生日、おめでとう。
 ---
-……こら。近い。</textarea>
+あれからもう1年経ったということか、
+ふっ、月日の流れとは早いものだな。
+---
+時にグラン……実はお誕生日の
+さぷらいず、というものを考えて
+来たのだが、受け取ってくれるか？</textarea>
 
   <div class="row">
     <button id="playBtn">再生</button>
   </div>
 
   <div class="smallNote">
-    画面タップ：途中は全文表示／全文後は次へ。最後まで行くと最初に戻ります。<br>
-    bg/ と chara/ は index.html と同じ場所に置いてください。
+    画面タップ：途中は全文表示／全文後は次へ。最後まで行くと最初に戻ります。</br）>
   </div>
 </div>
 
