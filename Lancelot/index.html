@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>グブ式会話ジェネレーター</title>
 
 <style>
@@ -12,54 +12,45 @@
   font-display:swap;
 }
 
-html, body{
+html,body{
   height:100%;
   margin:0;
   background:#000;
   color:#fff;
-  font-family:"NewCinemaAStdD", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  font-family:"NewCinemaAStdD", system-ui, -apple-system, "Noto Sans JP", sans-serif;
   user-select:none;
   -webkit-tap-highlight-color:transparent;
 }
 
-/* ===== ステージ ===== */
 #stage{
   position:fixed;
   inset:0;
   overflow:hidden;
-  background:#000;
 }
 
-/* ===== ヘッダー ===== */
+/* header */
 #header{
   position:fixed;
   left:0; right:0; top:0;
   z-index:10;
   pointer-events:none;
-  transform: translateY(0);
 }
-#header img{
-  width:100%;
-  height:auto;
-  display:block;
-}
-:root{ --headerOverlap: 60px; }
+#header img{ width:100%; height:auto; display:block; }
 
-/* ===== 背景＋立ち絵 ===== */
+/* scene */
 #scene{
   position:absolute;
-  left:0; right:0; top:calc(-1 * var(--headerOverlap, 60px));
-  height:calc(100vh - var(--uiH, 0px) + var(--headerOverlap, 60px));
+  left:0; right:0; top:-60px;
+  height:calc(100vh + 60px);
   overflow:hidden;
 }
 .bg{
   position:absolute;
   inset:0;
-  background-size:contain;
-  background-position:bottom center;
+  background-size:cover;
+  background-position:center;
   background-repeat:no-repeat;
-  background-color:#000;
-  transform: scale(1.1);
+  transform:scale(1.1);
 }
 .chara{
   position:absolute;
@@ -68,13 +59,11 @@ html, body{
   transform:translateX(-50%);
   max-width:100%;
   max-height:100%;
-  width:auto;
-  height:auto;
   object-fit:contain;
   pointer-events:none;
 }
 
-/* ===== メッセージUI（不変更） ===== */
+/* ui */
 .ui{
   position:fixed;
   left:0; right:0; bottom:0;
@@ -83,72 +72,74 @@ html, body{
 .ui-scale{
   position:relative;
   left:50%;
-  transform:translateX(-50%) scale(var(--uiScale,1));
-  transform-origin:bottom center;
-  width:calc(var(--uiBaseW, 640) * 1px);
+  transform:translateX(-50%);
+  width:640px;
 }
-.window-img{ display:block; width:100%; height:auto; }
+.window-img{
+  display:block;
+  width:100%;
+  height:auto;
+}
 
-/* 文字 */
-:root{
-  --nameLeft: 38px;
-  --nameTop: -4px;
-  --nameSize: 28px;
-  --textLeft: 48px;
-  --textRight: 54px;
-  --textTop: 76px;
-  --textSize: 26px;
-  --textLine: 1.55;
-  --textLetter: 0.02em;
-  --hintRight: 28px;
-  --hintBottom: 20px;
-}
+/* text */
 .name{
-  position:absolute; left:var(--nameLeft); top:var(--nameTop); right:60px;
-  font-size:var(--nameSize); letter-spacing:var(--textLetter);
-  color:rgba(255,255,255,.92); text-shadow:0 2px 6px rgba(0,0,0,.65);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; z-index:2;
+  position:absolute;
+  left:38px;
+  top:-4px;
+  font-size:28px;
 }
 .text{
-  position:absolute; left:var(--textLeft); right:var(--textRight); top:var(--textTop);
-  font-size:var(--textSize); line-height:var(--textLine);
-  letter-spacing:var(--textLetter);
-  color:rgba(255,255,255,.90); text-shadow:0 2px 6px rgba(0,0,0,.68);
-  white-space:pre-wrap; min-height:3.2em; z-index:2;
+  position:absolute;
+  left:48px;
+  right:54px;
+  top:76px;
+  font-size:26px;
+  line-height:1.55;
+  white-space:pre-wrap;
 }
+
 .hint{
-  position:absolute; right:var(--hintRight); bottom:var(--hintBottom);
-  display:none; animation:blink 1.2s infinite ease-in-out; z-index:2;
+  position:absolute;
+  right:28px;
+  bottom:20px;
+  animation:blink 1.2s infinite ease-in-out;
 }
+.hint img{ width:80px; margin-top:-8px; }
+
 @keyframes blink{
-  0%,100%{opacity:.25; transform:translateY(0)}
-  50%{opacity:1; transform:translateY(-2px)}
+  0%,100%{opacity:.3}
+  50%{opacity:1}
 }
-.hint img{ width:80px; height:auto; display:block; margin-top:-8px; }
 
-/* タップ */
-.tap{ position:fixed; inset:0; z-index:20; }
-
-/* ===== 編集UI（存在は維持・最初は非表示） ===== */
-#editor{ display:none; }   /* ← 固定版なので初期非表示 */
-#miniBtn{ display:none; }  /* ← 固定版なので非表示 */
+.tap{
+  position:fixed;
+  inset:0;
+  z-index:20;
+}
 </style>
 </head>
 
 <body>
 <div id="stage">
-  <div id="header"><img id="headerImg" src="./header.png" alt=""></div>
+
+  <div id="header">
+    <img src="./header.png" alt="">
+  </div>
+
   <div id="scene">
     <div class="bg" id="bg"></div>
     <img class="chara" id="chara" alt="">
   </div>
 
   <div class="ui">
-    <div class="ui-scale" id="uiScale">
-      <img class="window-img" id="windowImg" src="./parts-sf4d7619aab.jpg" alt="">
-      <div class="name" id="nameLayer"></div>
-      <div class="text" id="textLayer"></div>
-      <div class="hint" id="hint"><img id="nextImg" src="./next.png" alt="next"></div>
+    <div class="ui-scale">
+      <!-- ★ メッセージウインドウ画像（自分用と同じ・1つ上） -->
+      <img class="window-img" id="windowImg" src="../parts-sf4d7619aab.jpg" alt="">
+      <div class="name" id="name">ランスロット</div>
+      <div class="text" id="text"></div>
+      <div class="hint" id="hint">
+        <img src="../next.png" alt="next">
+      </div>
     </div>
   </div>
 
@@ -158,94 +149,52 @@ html, body{
 <script>
 const elBg = document.getElementById("bg");
 const elChara = document.getElementById("chara");
-const elName = document.getElementById("nameLayer");
-const elText = document.getElementById("textLayer");
+const elText = document.getElementById("text");
 const elHint = document.getElementById("hint");
-const elUiScale = document.getElementById("uiScale");
-const windowImg = document.getElementById("windowImg");
 
-let lines = [], idx = 0, timer = null, full = "", cursor = 0, typing = false;
+elBg.style.backgroundImage = 'url("../bg/temp.jpg")';
+elChara.src = "./Lancelot.png";
 
-function parseMessages(raw){
-  const parts = raw
-    .split(/\n---\n|^---\n|\n---$|^---$/m)
-    .map(s => s.replace(/\r/g,"").trim())
-    .filter(Boolean);
-  return parts.length ? parts : [""];
-}
+const raw = `
+あああ
+---
+いいい
+`;
 
-/* UIスケール */
-function updateUILayout(){
-  const baseW = windowImg.naturalWidth || 640;
-  document.documentElement.style.setProperty("--uiBaseW", String(baseW));
-  const s = window.innerWidth / baseW;
-  elUiScale.style.setProperty("--uiScale", String(s));
-  const rect = elUiScale.getBoundingClientRect();
-  document.documentElement.style.setProperty("--uiH", rect.height + "px");
-}
-windowImg.addEventListener("load", updateUILayout);
-addEventListener("resize", updateUILayout);
+const lines = raw.trim().split("\n---\n");
+let i = 0;
+let typing = false;
+let timer = null;
 
-function stopTyping(){ if(timer){ clearInterval(timer); timer=null; } }
-function finishTyping(){
-  stopTyping();
-  elText.textContent = full;
-  typing = false;
-  elHint.style.display = "block";
-}
-function showLine(i){
-  stopTyping();
-  idx = Math.max(0, Math.min(i, lines.length - 1));
-  full = lines[idx] || "";
-  cursor = 0;
+function show(idx){
+  if(timer){ clearInterval(timer); }
   elText.textContent = "";
-  typing = true;
   elHint.style.display = "none";
-  timer = setInterval(() => {
-    cursor++;
-    elText.textContent = full.slice(0, cursor);
-    if(cursor >= full.length) finishTyping();
+  let t = lines[idx];
+  let c = 0;
+  typing = true;
+  timer = setInterval(()=>{
+    elText.textContent = t.slice(0, ++c);
+    if(c >= t.length){
+      clearInterval(timer);
+      typing = false;
+      elHint.style.display = "block";
+    }
   }, 30);
 }
+
 function next(){
-  if(typing){ finishTyping(); return; }
-  idx++; if(idx >= lines.length) idx = 0;
-  showLine(idx);
+  if(typing){
+    elText.textContent = lines[i];
+    typing = false;
+    elHint.style.display = "block";
+    return;
+  }
+  i = (i+1)%lines.length;
+  show(i);
 }
 
-function alignHeaderToCharaTop(){
-  const header = document.getElementById("header");
-  const chara  = document.getElementById("chara");
-  if(!header || !chara) return;
-  const r = chara.getBoundingClientRect();
-  if(!isFinite(r.top) || r.height === 0) return;
-  header.style.transform = `translateY(${r.top}px)`;
-}
-window.addEventListener("load", alignHeaderToCharaTop);
-window.addEventListener("resize", alignHeaderToCharaTop);
-
-/* ===== 初期値を固定 ===== */
-(function initFixed(){
-  // 背景（仮）
-  elBg.style.backgroundImage = 'url("./bg/temp.jpg")';
-
-  // 立ち絵（Lancelot）
-  elChara.onload = alignHeaderToCharaTop;
-  elChara.src = "./Lancelot.png";
-  elChara.style.display = "block";
-
-  // 名前
-  elName.textContent = "ランスロット";
-
-  // 台詞（--- 区切り）
-  const raw = `あああ
----
-いいい`;
-  lines = parseMessages(raw);
-  showLine(0);
-})();
-
-/* タップで進む */
+show(0);
 document.getElementById("tap").addEventListener("click", next);
 </script>
 </body>
