@@ -1,1 +1,62 @@
-あああ
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Lancelot</title>
+
+<!-- 既存の共通CSSを流用 -->
+<link rel="stylesheet" href="../style.css">
+
+<style>
+/* 背景（仮） */
+#bg{
+  background-image: url("../bg/temp.png");
+}
+
+/* キャラ固定 */
+#chara{
+  background-image: url("./Lancelot.png");
+}
+
+/* next サイズと位置（安定版） */
+.hint img,
+#nextImg{
+  width:80px;
+  height:auto;
+  display:block;
+  margin-top:-8px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="bg"></div>
+<div id="chara"></div>
+
+<div id="window">
+  <div id="name">ランスロット</div>
+  <div id="message"></div>
+</div>
+
+<img id="nextImg" src="../ui/next.png" alt="next">
+
+<script>
+/* 台詞固定（シンプル） */
+const messages = [
+  "あああ",
+  "いいい"
+];
+
+let i = 0;
+const msg = document.getElementById("message");
+msg.textContent = messages[0];
+
+document.getElementById("nextImg").onclick = () => {
+  i = (i + 1) % messages.length;
+  msg.textContent = messages[i];
+};
+</script>
+
+</body>
+</html>
