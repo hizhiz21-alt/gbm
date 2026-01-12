@@ -37,6 +37,7 @@ html, body{
   left:0; right:0; top:0;
   z-index:10;
   pointer-events:none;
+  transform: translateY(0);
 }
 #header img{
   width:100%;
@@ -45,7 +46,7 @@ html, body{
 }
 
 /* ヘッダー下を背景に被せる量（追加） */
-:root{ --headerOverlap: 60px; }
+:root{ --headerOverlap: 0px; }
 
 /* ===== 背景＋立ち絵の表示領域（ウインドウ分を引く） ===== */
 #scene{
@@ -474,6 +475,18 @@ function __fill(sel, arr){
   if (window.bgPath) __fill(bgPath, await __loadList('./bg/list.json'));
   if (window.charaPath) __fill(charaPath, await __loadList('./chara/list.json'));
 })();
+
+
+function alignHeaderToCharaTop(){
+  const header=document.getElementById("header");
+  const chara=document.getElementById("chara");
+  if(!header||!chara) return;
+  const r=chara.getBoundingClientRect();
+  if(!isFinite(r.top)||r.height===0) return;
+  header.style.transform=`translateY(${r.top}px)`;
+}
+window.addEventListener("load", alignHeaderToCharaTop);
+window.addEventListener("resize", alignHeaderToCharaTop);
 
 </script>
 </body>
