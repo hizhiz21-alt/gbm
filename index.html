@@ -154,11 +154,7 @@ html, body{
   z-index:2;
 }
 
-.hint img{
-  width:28px;
-  height:auto;
-  display:block;
-}
+
 
 @keyframes blink{
   0%,100%{opacity:.25; transform:translateY(0)}
@@ -249,11 +245,15 @@ button{
 
 
 /* === CLEAN FIX: next/hint icon === */
+
+
+
+/* FINAL FIX: next / hint icon (single source of truth) */
 .hint img{
-  width:96px;          /* modest size */
+  width:80px;
   height:auto;
   display:block;
-  transform: translateY(-6px); /* slightly higher */
+  margin-top:-8px;
 }
 
 </style>
