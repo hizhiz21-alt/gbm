@@ -46,7 +46,7 @@ html, body{
 }
 
 /* ヘッダー下を背景に被せる量（追加） */
-:root{ --headerOverlap: 0px; }
+:root{ --headerOverlap: 60px; }
 
 /* ===== 背景＋立ち絵の表示領域（ウインドウ分を引く） ===== */
 #scene{
@@ -428,13 +428,17 @@ playBtn.addEventListener("click", async () => {
   /* 立ち絵：読み込み優先 → フォルダ指定 */
   if(charaFile.files && charaFile.files[0]){
     const u = await readAsDataURL(charaFile.files[0]);
+    elChara.onload = alignHeaderToCharaTop;
     elChara.src = u;
     elChara.style.display = "block";
+    alignHeaderToCharaTop();
   }else{
     const nm = safeName(charaPath.value);
     if(nm){
+      elChara.onload = alignHeaderToCharaTop;
       elChara.src = `./chara/${encodeURIComponent(nm)}`;
       elChara.style.display = "block";
+      alignHeaderToCharaTop();
     }else{
       elChara.removeAttribute("src");
       elChara.style.display = "none";
@@ -478,12 +482,14 @@ function __fill(sel, arr){
 
 
 function alignHeaderToCharaTop(){
-  const header=document.getElementById("header");
-  const chara=document.getElementById("chara");
-  if(!header||!chara) return;
-  const r=chara.getBoundingClientRect();
-  if(!isFinite(r.top)||r.height===0) return;
-  header.style.transform=`translateY(${r.top}px)`;
+  const header = document.getElementById("header");
+  const chara  = document.getElementById("chara");
+  if(!header || !chara) return;
+
+  const r = chara.getBoundingClientRect();
+  if(!isFinite(r.top) || r.height === 0) return;
+
+  header.style.transform = `translateY(${r.top}px)`;
 }
 window.addEventListener("load", alignHeaderToCharaTop);
 window.addEventListener("resize", alignHeaderToCharaTop);
