@@ -296,15 +296,29 @@ function showLine(i){
     if(cursor >= full.length) finishTyping();
   }, 30);
 }
+let ended = false;
+
 function next(){
-  if(typing){ finishTyping(); return; }
+  if(typing){
+    finishTyping();
+    return;
+  }
+
+  // 最後の行で一度止まる
+  if(idx === lines.length - 1 && !ended){
+    ended = true;
+    return;
+  }
+
+  // 次のタップで最初に戻る
   idx++;
-  if(idx >= lines.length) idx = 0;
+  if(idx >= lines.length){
+    idx = 0;
+  }
+
+  ended = false;
   showLine(idx);
 }
-
-tap.addEventListener("click", next);
-
 /* 起動時即再生 */
 updateUILayout();
 showLine(0);
