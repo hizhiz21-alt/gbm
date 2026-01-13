@@ -154,6 +154,8 @@ html, body{
   position:fixed;
   inset:0;
   z-index:20;
+  cursor:pointer;
+  touch-action:manipulation;
 }
 </style>
 </head>
@@ -216,32 +218,12 @@ const messages = `
 のんびり過ごすだけでもいい。
 ミオが笑ってくれるなら、それが一番だ。
 ---
-……ああ、そうだ。これ
-も渡しておきたくて。
----
-見た目が、なんとなく
-俺を思い出す色だろ？
----
-店で見かけた時、妙に目について……
-気づいたら手に取ってた。
----
-誕生日当日には
-間に合わなかったけど、
-今日こうして渡せてよかった。
----
-忙しい時にでも、
-少しずつ食べてくれたら嬉しい。
----
 ……改めて。
 生まれてきてくれてありがとう。
 出会ってくれてありがとう。
 ---
-今年の誕生日も、その先の時間も……
-出来る限り、俺の隣にいてくれ。
----
 さあ、行こうか。
 今日は、ミオのための日だ。
-
 `;
 
 const lines = messages
@@ -260,6 +242,7 @@ let timer = null;
 let full = "";
 let cursor = 0;
 let typing = false;
+let ended = false;
 
 /* UIサイズ調整 */
 function updateUILayout(){
@@ -296,45 +279,44 @@ function showLine(i){
     if(cursor >= full.length) finishTyping();
   }, 30);
 }
-let ended = false;
 
 function next(){
   if(typing){
     finishTyping();
     return;
   }
-
-  // 最後の行で一度止まる
   if(idx === lines.length - 1 && !ended){
     ended = true;
     return;
   }
-
-  // 次のタップで最初に戻る
   idx++;
-  if(idx >= lines.length){
-    idx = 0;
-  }
-
+  if(idx >= lines.length) idx = 0;
   ended = false;
   showLine(idx);
 }
-/* 起動時即再生 */
+
+/* タップ処理（端末差完全対応） */
+function onTap(e){
+  e.preventDefault();
+  next();
+}
+tap.addEventListener("pointerdown", onTap, { passive:false });
+tap.addEventListener("touchend", onTap, { passive:false });
+tap.addEventListener("click", onTap);
+
+/* 起動 */
 updateUILayout();
 showLine(0);
 
-  /* ===== ヘッダーをキャラ上端に合わせる（本家仕様） ===== */
+/* ヘッダーをキャラ上端に合わせる（本家仕様） */
 function alignHeaderToCharaTop(){
   const header = document.getElementById("header");
   const chara  = document.querySelector(".chara");
   if(!header || !chara) return;
-
   const r = chara.getBoundingClientRect();
   if(!isFinite(r.top) || r.height === 0) return;
-
   header.style.transform = `translateY(${r.top}px)`;
 }
-
 window.addEventListener("load", alignHeaderToCharaTop);
 window.addEventListener("resize", alignHeaderToCharaTop);
 </script>
