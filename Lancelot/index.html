@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>グブ式会話ジェネレーター</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Lancelot</title>
 
 <style>
 @font-face{
@@ -12,46 +12,56 @@
   font-display:swap;
 }
 
-html,body{
+html, body{
   height:100%;
   margin:0;
   background:#000;
   color:#fff;
-  font-family:"NewCinemaAStdD", system-ui, -apple-system, "Noto Sans JP", sans-serif;
+  font-family:"NewCinemaAStdD", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
   user-select:none;
   -webkit-tap-highlight-color:transparent;
 }
 
+/* ===== ステージ ===== */
 #stage{
   position:fixed;
   inset:0;
   overflow:hidden;
+  background:#000;
 }
 
-/* header */
+/* ===== ヘッダー ===== */
 #header{
   position:fixed;
   left:0; right:0; top:0;
   z-index:10;
   pointer-events:none;
 }
-#header img{ width:100%; height:auto; display:block; }
+#header img{
+  width:100%;
+  height:auto;
+  display:block;
+}
 
-/* scene */
+/* ヘッダー下を被せる量 */
+:root{ --headerOverlap: 60px; }
+
+/* ===== 背景＋立ち絵 ===== */
 #scene{
   position:absolute;
-  left:0; right:0; top:-60px;
-  height:calc(100vh + 60px);
+  left:0; right:0;
+  top:calc(-1 * var(--headerOverlap));
+  height:calc(100vh - var(--uiH, 0px) + var(--headerOverlap));
   overflow:hidden;
 }
+
 .bg{
   position:absolute;
   inset:0;
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
+  background:url("./room1.jpg") bottom center / contain no-repeat #000;
   transform:scale(1.1);
 }
+
 .chara{
   position:absolute;
   left:50%;
@@ -63,7 +73,7 @@ html,body{
   pointer-events:none;
 }
 
-/* ui */
+/* ===== メッセージウインドウ ===== */
 .ui{
   position:fixed;
   left:0; right:0; bottom:0;
@@ -72,8 +82,9 @@ html,body{
 .ui-scale{
   position:relative;
   left:50%;
-  transform:translateX(-50%);
-  width:640px;
+  transform:translateX(-50%) scale(var(--uiScale,1));
+  transform-origin:bottom center;
+  width:calc(var(--uiBaseW, 640) * 1px);
 }
 .window-img{
   display:block;
@@ -81,36 +92,64 @@ html,body{
   height:auto;
 }
 
-/* text */
+/* 文字 */
+:root{
+  --nameLeft: 38px;
+  --nameTop: -4px;
+  --nameSize: 28px;
+  --textLeft: 48px;
+  --textRight: 54px;
+  --textTop: 76px;
+  --textSize: 26px;
+  --textLine: 1.55;
+  --textLetter: 0.02em;
+  --hintRight: 28px;
+  --hintBottom: 20px;
+}
 .name{
   position:absolute;
-  left:38px;
-  top:-4px;
-  font-size:28px;
+  left:var(--nameLeft);
+  top:var(--nameTop);
+  right:60px;
+  font-size:var(--nameSize);
+  letter-spacing:var(--textLetter);
+  color:rgba(255,255,255,.92);
+  text-shadow:0 2px 6px rgba(0,0,0,.65);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 .text{
   position:absolute;
-  left:48px;
-  right:54px;
-  top:76px;
-  font-size:26px;
-  line-height:1.55;
+  left:var(--textLeft);
+  right:var(--textRight);
+  top:var(--textTop);
+  font-size:var(--textSize);
+  line-height:var(--textLine);
+  letter-spacing:var(--textLetter);
+  color:rgba(255,255,255,.90);
+  text-shadow:0 2px 6px rgba(0,0,0,.68);
   white-space:pre-wrap;
+  min-height:3.2em;
 }
-
 .hint{
   position:absolute;
-  right:28px;
-  bottom:20px;
+  right:var(--hintRight);
+  bottom:var(--hintBottom);
   animation:blink 1.2s infinite ease-in-out;
 }
-.hint img{ width:80px; margin-top:-8px; }
-
-@keyframes blink{
-  0%,100%{opacity:.3}
-  50%{opacity:1}
+.hint img{
+  width:80px;
+  height:auto;
+  display:block;
 }
 
+@keyframes blink{
+  0%,100%{opacity:.25; transform:translateY(0)}
+  50%{opacity:1; transform:translateY(-2px)}
+}
+
+/* タップ */
 .tap{
   position:fixed;
   inset:0;
@@ -121,24 +160,22 @@ html,body{
 
 <body>
 <div id="stage">
-
   <div id="header">
     <img src="./header.png" alt="">
   </div>
 
   <div id="scene">
-    <div class="bg" id="bg"></div>
-    <img class="chara" id="chara" alt="">
+    <div class="bg"></div>
+    <img class="chara" src="./Lancelot.png" alt="">
   </div>
 
   <div class="ui">
-    <div class="ui-scale">
-      <!-- ★ メッセージウインドウ画像（自分用と同じ・1つ上） -->
-      <img class="window-img" id="windowImg" src="../parts-sf4d7619aab.jpg" alt="">
-      <div class="name" id="name">ランスロット</div>
-      <div class="text" id="text"></div>
+    <div class="ui-scale" id="uiScale">
+      <img class="window-img" id="windowImg" src="./parts-sf4d7619aab.jpg" alt="">
+      <div class="name" id="nameLayer">Lancelot</div>
+      <div class="text" id="textLayer"></div>
       <div class="hint" id="hint">
-        <img src="../next.png" alt="next">
+        <img src="./next.png" alt="next">
       </div>
     </div>
   </div>
@@ -147,55 +184,80 @@ html,body{
 </div>
 
 <script>
-const elBg = document.getElementById("bg");
-const elChara = document.getElementById("chara");
-const elText = document.getElementById("text");
-const elHint = document.getElementById("hint");
-
-elBg.style.backgroundImage = 'url("../bg/temp.jpg")';
-elChara.src = "./Lancelot.png";
-
-const raw = `
-あああ
+/* ===== 固定セリフ ===== */
+const messages = `
+ここに一行目のセリフを書く。
 ---
-いいい
+二行目。
+改行もそのまま使える。
+---
+最後のセリフ。
 `;
 
-const lines = raw.trim().split("\n---\n");
-let i = 0;
-let typing = false;
-let timer = null;
+const lines = messages
+  .split(/\n---\n|^---\n|\n---$|^---$/m)
+  .map(s => s.replace(/\r/g,"").trim())
+  .filter(Boolean);
 
-function show(idx){
-  if(timer){ clearInterval(timer); }
+const elText = document.getElementById("textLayer");
+const elHint = document.getElementById("hint");
+const tap = document.getElementById("tap");
+const windowImg = document.getElementById("windowImg");
+const uiScale = document.getElementById("uiScale");
+
+let idx = 0;
+let timer = null;
+let full = "";
+let cursor = 0;
+let typing = false;
+
+/* UIサイズ調整 */
+function updateUILayout(){
+  const baseW = windowImg.naturalWidth || 640;
+  document.documentElement.style.setProperty("--uiBaseW", baseW);
+  const s = window.innerWidth / baseW;
+  uiScale.style.setProperty("--uiScale", s);
+  const rect = uiScale.getBoundingClientRect();
+  document.documentElement.style.setProperty("--uiH", rect.height + "px");
+}
+windowImg.addEventListener("load", updateUILayout);
+addEventListener("resize", updateUILayout);
+
+function stopTyping(){
+  if(timer){ clearInterval(timer); timer=null; }
+}
+function finishTyping(){
+  stopTyping();
+  elText.textContent = full;
+  typing = false;
+  elHint.style.display = "block";
+}
+function showLine(i){
+  stopTyping();
+  idx = Math.max(0, Math.min(i, lines.length - 1));
+  full = lines[idx] || "";
+  cursor = 0;
   elText.textContent = "";
-  elHint.style.display = "none";
-  let t = lines[idx];
-  let c = 0;
   typing = true;
-  timer = setInterval(()=>{
-    elText.textContent = t.slice(0, ++c);
-    if(c >= t.length){
-      clearInterval(timer);
-      typing = false;
-      elHint.style.display = "block";
-    }
+  elHint.style.display = "none";
+  timer = setInterval(() => {
+    cursor++;
+    elText.textContent = full.slice(0, cursor);
+    if(cursor >= full.length) finishTyping();
   }, 30);
 }
-
 function next(){
-  if(typing){
-    elText.textContent = lines[i];
-    typing = false;
-    elHint.style.display = "block";
-    return;
-  }
-  i = (i+1)%lines.length;
-  show(i);
+  if(typing){ finishTyping(); return; }
+  idx++;
+  if(idx >= lines.length) idx = 0;
+  showLine(idx);
 }
 
-show(0);
-document.getElementById("tap").addEventListener("click", next);
+tap.addEventListener("click", next);
+
+/* 起動時即再生 */
+updateUILayout();
+showLine(0);
 </script>
 </body>
 </html>
