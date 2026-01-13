@@ -296,13 +296,15 @@ function next(){
 }
 
 /* タップ処理（端末差完全対応） */
-function onTap(e){
-  e.preventDefault();
+function onTap(){
   next();
 }
-tap.addEventListener("pointerdown", onTap, { passive:false });
-tap.addEventListener("touchend", onTap, { passive:false });
-tap.addEventListener("click", onTap);
+
+if (window.PointerEvent) {
+  tap.addEventListener("pointerdown", onTap);
+} else {
+  tap.addEventListener("click", onTap);
+}
 
 /* 起動 */
 updateUILayout();
