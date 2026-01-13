@@ -186,12 +186,62 @@ html, body{
 <script>
 /* ===== 固定セリフ ===== */
 const messages = `
-ここに一行目のセリフを書く。
+……あ、ミオ。
+ちょうど探してたんだ。
 ---
-二行目。
-改行もそのまま使える。
+誕生日、おめでとう。
+少し遅くなってしまったけど……
+どうしても、直接伝えたかった。
 ---
-最後のセリフ。
+忙しくしてるのは分かってたし、
+無理させたくもなかったからさ。
+---
+でも、やっぱりちゃんと祝いたかったんだ。
+---
+今日は完全オフにしてある。
+鍛錬も執務もなし。
+---
+……その代わり、俺を独り占め
+してくれていいからな。
+---
+え？　そんな顔するなって。
+今日は主役なんだろ？
+---
+行き先？
+ふふっ、いくつか考えてはいるけど
+……最初はミオの行きたいところを
+聞かせてほしい。
+---
+甘い物でも、散歩でも、
+のんびり過ごすだけでもいい。
+ミオが笑ってくれるなら、それが一番だ。
+---
+……ああ、そうだ。これ
+も渡しておきたくて。
+---
+見た目が、なんとなく
+俺を思い出す色だろ？
+---
+店で見かけた時、妙に目について……
+気づいたら手に取ってた。
+---
+誕生日当日には
+間に合わなかったけど、
+今日こうして渡せてよかった。
+---
+忙しい時にでも、
+少しずつ食べてくれたら嬉しい。
+---
+……改めて。
+生まれてきてくれてありがとう。
+出会ってくれてありがとう。
+---
+今年の誕生日も、その先の時間も……
+出来る限り、俺の隣にいてくれ。
+---
+さあ、行こうか。
+今日は、ミオのための日だ。
+
 `;
 
 const lines = messages
@@ -258,6 +308,21 @@ tap.addEventListener("click", next);
 /* 起動時即再生 */
 updateUILayout();
 showLine(0);
+
+  /* ===== ヘッダーをキャラ上端に合わせる（本家仕様） ===== */
+function alignHeaderToCharaTop(){
+  const header = document.getElementById("header");
+  const chara  = document.querySelector(".chara");
+  if(!header || !chara) return;
+
+  const r = chara.getBoundingClientRect();
+  if(!isFinite(r.top) || r.height === 0) return;
+
+  header.style.transform = `translateY(${r.top}px)`;
+}
+
+window.addEventListener("load", alignHeaderToCharaTop);
+window.addEventListener("resize", alignHeaderToCharaTop);
 </script>
 </body>
 </html>
