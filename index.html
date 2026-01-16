@@ -320,6 +320,10 @@ button{
 来たのだが、受け取ってくれるか？</textarea>
 
   <div class="row">
+    <button id="insertTagBtn">＋ 話者記法を挿入</button>
+  </div>
+
+  <div class="row">
     <button id="playBtn">再生</button>
   </div>
 
@@ -428,10 +432,28 @@ function showLine(i){
 
   if(item.name){
     currentName = item.name;
-    elName.textContent = currentName;
   }
   if(item.chara){
     currentChara = item.chara;
+  }
+
+  // fallback to current editor selection if no tag
+  if(!item.name){
+    const file = charaPath.value;
+    if(file){
+      if(file.startsWith("gran")) currentName = "グラン";
+      else if(file.startsWith("sieg")) currentName = "ジークフリート";
+    }
+  }
+  if(!item.chara){
+    const file = charaPath.value;
+    if(file) currentChara = file;
+  }
+
+  if(currentName){
+    elName.textContent = currentName;
+  }
+  if(currentChara){
     elChara.onload = alignHeaderToCharaTop;
     elChara.src = `./chara/${encodeURIComponent(currentChara)}`;
     elChara.style.display = "block";
@@ -510,6 +532,36 @@ tap.addEventListener("click", () => {
   if(editor.style.display !== "none") return;
   next();
 });
+
+const insertTagBtn = document.getElementById("insertTagBtn");
+
+function nameFromCharaFile(file){
+  if(!file) return "";
+  if(file.startsWith("gran")) return "グラン";
+  if(file.startsWith("sieg")) return "ジークフリート";
+  return "";
+}
+
+insertTagBtn.addEventListener("click", () => {
+  const file = charaPath.value;
+  if(!file) return;
+
+  const name = nameFromCharaFile(file);
+  if(!name) return;
+
+  const tag = `[${name}|${file}]`;
+
+  const ta = msgInput;
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const value = ta.value;
+
+  ta.value = value.slice(0, start) + tag + value.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + tag.length;
+  ta.focus();
+});
+
+
 miniBtn.addEventListener("click", () => {
   stopTyping();
   editor.style.display = "block";
@@ -547,3 +599,4 @@ window.addEventListener("resize", alignHeaderToCharaTop);
 </script>
 </body>
 </html>
+
