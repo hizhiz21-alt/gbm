@@ -306,7 +306,7 @@ button{
     
   </div>
 
-  <label>メッセージ（--- で区切り、[キャラ名|立ち絵ファイル名]で個別設定可）</label>
+  <label>メッセージ（--- で区切り）</label>
   <textarea id="msgInput">誕生日、おめでとう。
 ---
 あれからもう1年経ったということか、
@@ -325,7 +325,7 @@ button{
   </div>
 
   <div class="smallNote">
-  </br）>
+    画面タップ：途中は全文表示／全文後は次へ。最後まで行くと最初に戻ります。</br）>
   </div>
 </div>
 
@@ -393,7 +393,7 @@ function parseMessages(raw){
 }
 
 async function applyPickedFont(){
-  if(!fontFile.files || !fontFile.files[0]) return;
+  if(typeof fontFile === "undefined" || !fontFile || !fontFile.files || !fontFile.files[0]) return;
   const file = fontFile.files[0];
   const url = URL.createObjectURL(file);
   try{
