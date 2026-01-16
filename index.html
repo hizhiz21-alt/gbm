@@ -476,7 +476,8 @@ function showLine(i){
 }
 function next(){
   if(typing){ finishTyping(); return; }
-  idx++; if(idx >= lines.length) idx = 0;
+  if(idx >= lines.length - 1) return;
+  idx++;
   showLine(idx);
 }
 
@@ -603,3 +604,4 @@ window.addEventListener("resize", alignHeaderToCharaTop);
 </script>
 </body>
 </html>
+
