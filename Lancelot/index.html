@@ -306,13 +306,10 @@ function next(){
     finishTyping();
     return;
   }
-  if(idx === lines.length - 1 && !ended){
-    ended = true;
+  if(idx >= lines.length - 1){
     return;
   }
   idx++;
-  if(idx >= lines.length) idx = 0;
-  ended = false;
   showLine(idx);
 }
 
