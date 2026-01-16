@@ -4,97 +4,546 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>グブ式会話ジェネレーター</title>
+
 <style>
-@font-face{font-family:"NewCinemaAStdD";src:url("./FOT-NewCinemaAStd-D.otf") format("opentype");font-display:swap;}
-html,body{height:100%;margin:0;background:#000;color:#fff;font-family:"NewCinemaAStdD",system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;user-select:none;-webkit-tap-highlight-color:transparent}
-#stage{position:fixed;inset:0;overflow:hidden;background:#000}
-#header{position:fixed;left:0;right:0;top:0;z-index:10;pointer-events:none}
-#header img{width:100%;height:auto;display:block}
-:root{--headerOverlap:60px}
-#scene{position:absolute;left:0;right:0;top:calc(-1 * var(--headerOverlap));height:calc(100vh - var(--uiH,0px) + var(--headerOverlap));overflow:hidden}
-.bg{position:absolute;inset:0;background-size:contain;background-position:bottom center;background-repeat:no-repeat;background-color:#000;transform:scale(1.1)}
-.chara{position:absolute;left:50%;bottom:0;transform:translateX(-50%);max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
-.ui{position:fixed;left:0;right:0;bottom:0;padding-bottom:env(safe-area-inset-bottom)}
-.ui-scale{position:relative;left:50%;transform-origin:bottom center;width:calc(var(--uiBaseW,640) * 1px);transform:translateX(-50%) scale(var(--uiScale,1))}
-.window-img{display:block;width:100%;height:auto}
-:root{--nameLeft:38px;--nameTop:-4px;--nameSize:28px;--textLeft:48px;--textRight:54px;--textTop:92px;--textSize:26px;--textLine:1.55;--textLetter:.02em;--hintRight:28px;--hintBottom:20px}
-.name{position:absolute;left:var(--nameLeft);top:var(--nameTop);right:60px;font-size:var(--nameSize);letter-spacing:var(--textLetter);color:rgba(255,255,255,.92);text-shadow:0 2px 6px rgba(0,0,0,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}
-.text{position:absolute;left:var(--textLeft);right:var(--textRight);top:var(--textTop);font-size:var(--textSize);line-height:var(--textLine);letter-spacing:var(--textLetter);color:rgba(255,255,255,.90);text-shadow:0 2px 6px rgba(0,0,0,.68);white-space:pre-wrap;min-height:3.2em;z-index:2}
-.hint{position:absolute;right:var(--hintRight);bottom:var(--hintBottom);font-size:18px;opacity:.9;display:none;z-index:2;animation:blink 1.2s infinite ease-in-out}
-@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
-.hint img{width:80px;height:auto;display:block;margin-top:-8px}
-.tap{position:fixed;inset:0;z-index:20}
-#editor{position:fixed;left:10px;right:10px;top:10px;z-index:30;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;backdrop-filter:blur(8px)}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row>*{flex:1 1 160px}
-label{font-size:12px;color:rgba(255,255,255,.78);display:block;margin-bottom:4px}
-input[type=file],input[type=text],textarea,button{width:100%;box-sizing:border-box;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:rgba(255,255,255,.92);padding:10px;font-size:14px}
-textarea{min-height:92px;resize:vertical;user-select:text}
-button{background:rgba(255,255,255,.12);font-weight:600}
-.smallNote{font-size:11px;color:rgba(255,255,255,.68);margin-top:6px}
-#editor label[for="fontFile"],#fontFile{display:none!important}
-#miniBtn{position:fixed;right:10px;top:10px;z-index:25;width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.55);color:rgba(255,255,255,.9);display:none}
-.miniLabel{margin-top:6px;opacity:.85}
+@font-face{
+  font-family:"NewCinemaAStdD";
+  src:url("./FOT-NewCinemaAStd-D.otf") format("opentype");
+  font-display:swap;
+}
+
+html, body{
+  height:100%;
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:"NewCinemaAStdD", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* ===== ステージ ===== */
+#stage{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+  background:#000;
+}
+
+
+/* ===== ヘッダー（追加） ===== */
+#header{
+  position:absolute;
+  left:0; right:0; top:0;
+  z-index:10;
+  pointer-events:none;
+  transform: translateY(0);
+}
+#header img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+
+/* ヘッダー下を背景に被せる量（追加） */
+:root{ --headerOverlap: 60px; }
+
+/* ===== 背景＋立ち絵の表示領域（ウインドウ分を引く） ===== */
+#scene{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:calc(var(--uiH, 0px) * 0.85);
+  overflow:hidden;
+}
+
+/* 背景：切らない／下揃え（元のまま） */
+.bg{
+  position:absolute;
+  inset:0;
+  background-size:contain;
+  background-position:bottom center;
+  background-repeat:no-repeat;
+  background-color:#000;
+  transform: scale(1.1);
+}
+
+/* 立ち絵：背景と同じ下基準（元のまま） */
+.chara{
+  position:absolute;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  pointer-events:none;
+}
+
+/* ===== メッセージウインドウ（既存・不変更） ===== */
+.ui{
+  position:fixed;
+  left:0; right:0; bottom:0;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.ui-scale{
+  position:relative;
+  left:50%;
+  transform:translateX(-50%) scale(var(--uiScale,1));
+  transform-origin:bottom center;
+  width:calc(var(--uiBaseW, 640) * 1px);
+}
+.window-img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+/* 文字（サイズだけ調整） */
+:root{
+  --nameLeft: 38px;
+  --nameTop: -4px;
+  --nameSize: 28px;
+  --textLeft: 48px;
+  --textRight: 54px;
+  --textTop: 76px;
+  --textSize: 26px;
+  --textLine: 1.55;
+  --textLetter: 0.02em;
+  --hintRight: 28px;
+  --hintBottom: 20px;
+}
+.name{
+  position:absolute;
+  left:var(--nameLeft);
+  top:var(--nameTop);
+  right:60px;
+  font-size:var(--nameSize);
+  letter-spacing:var(--textLetter);
+  color:rgba(255,255,255,.92);
+  text-shadow:0 2px 6px rgba(0,0,0,.65);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  z-index:2;
+}
+.text{
+  position:absolute;
+  left:var(--textLeft);
+  right:var(--textRight);
+  top:var(--textTop);
+  font-size:var(--textSize);
+  line-height:var(--textLine);
+  letter-spacing:var(--textLetter);
+  color:rgba(255,255,255,.90);
+  text-shadow:0 2px 6px rgba(0,0,0,.68);
+  white-space:pre-wrap;
+  min-height:3.2em;
+  z-index:2;
+}
+.hint{
+  position:absolute;
+  right:var(--hintRight);
+  bottom:var(--hintBottom);
+  font-size:18px;
+  opacity:.9;
+  text-shadow:0 2px 6px rgba(0,0,0,.75);
+  display:none;
+  animation:blink 1.2s infinite ease-in-out;
+  z-index:2;
+}
+
+
+
+@keyframes blink{
+  0%,100%{opacity:.25; transform:translateY(0)}
+  50%{opacity:1; transform:translateY(-2px)}
+}
+
+/* タップ */
+.tap{
+  position:fixed;
+  inset:0;
+  z-index:20;
+}
+
+/* ===== 編集UI（既存・最小追加） ===== */
+#editor{
+  position:fixed;
+  left:10px;
+  right:10px;
+  top:10px;
+  z-index:30;
+  background:rgba(0,0,0,.72);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:10px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+}
+.row{ display:flex; gap:8px; flex-wrap:wrap; }
+.row > *{ flex:1 1 160px; }
+label{
+  font-size:12px;
+  color:rgba(255,255,255,.78);
+  display:block;
+  margin-bottom:4px;
+}
+input[type="file"], input[type="text"], textarea, button{
+  width:100%;
+  box-sizing:border-box;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.92);
+  padding:10px;
+  font-size:14px;
+  outline:none;
+}
+textarea{
+  min-height:92px;
+  resize:vertical;
+  user-select:text;
+}
+button{
+  background:rgba(255,255,255,.12);
+  font-weight:600;
+}
+.smallNote{
+  font-size:11px;
+  color:rgba(255,255,255,.68);
+  margin-top:6px;
+  line-height:1.35;
+}
+
+/* ✎ボタン */
+#miniBtn{
+  position:fixed;
+  right:10px;
+  top:10px;
+  z-index:25;
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.55);
+  color:rgba(255,255,255,.9);
+  display:none;
+  backdrop-filter:blur(8px);
+}
+
+/* 追加：補助テキスト */
+.miniLabel{
+  margin-top:6px;
+  opacity:.85;
+}
+
+
+
+
+
+
+/* === CLEAN FIX: next/hint icon === */
+
+
+
+/* FINAL FIX: next / hint icon (single source of truth) */
+.hint img{
+  width:80px;
+  height:auto;
+  display:block;
+  margin-top:-8px;
+}
+
 </style>
 </head>
+
 <body>
 <div id="stage">
   <div id="header"><img id="headerImg" src="./header.png" alt=""></div>
-  <div id="scene"><div class="bg" id="bg"></div><img class="chara" id="chara" alt=""></div>
-  <div class="ui"><div class="ui-scale" id="uiScale">
-    <img class="window-img" id="windowImg" src="./parts-sf4d7619aab.jpg" alt="">
-    <div class="name" id="nameLayer"></div>
-    <div class="text" id="textLayer"></div>
-    <div class="hint" id="hint"><img id="nextImg" src="./next.png" alt="next"></div>
-  </div></div>
+  <div id="scene">
+    <div class="bg" id="bg"></div>
+    <img class="chara" id="chara" alt="">
+  </div>
+
+  <div class="ui">
+    <div class="ui-scale" id="uiScale">
+      <img class="window-img" id="windowImg" src="./parts-sf4d7619aab.jpg" alt="">
+      <div class="name" id="nameLayer"></div>
+      <div class="text" id="textLayer"></div>
+      <div class="hint" id="hint"><img id="nextImg" src="./next.png" alt="next">
+</div>
+    </div>
+  </div>
+
   <div class="tap" id="tap"></div>
 </div>
+
 <div id="editor">
   <div class="row">
-    <div><label>背景画像（700*688）</label><input type="file" id="bgFile" accept="image/*"><label class="miniLabel">背景ファイル名</label><select id="bgPath"></select></div>
-    <div><label>立ち絵（640*688）</label><input type="file" id="charaFile" accept="image/*"><label class="miniLabel">立ち絵ファイル名</label><select id="charaPath"></select></div>
+    <div>
+      <label>背景画像（700*688）</label>
+      <input type="file" id="bgFile" accept="image/*">
+      <label class="miniLabel">背景ファイル名</label>
+      <select id="bgPath"></select>
+    </div>
+    <div>
+      <label>立ち絵（640*688）</label>
+      <input type="file" id="charaFile" accept="image/*">
+      <label class="miniLabel">立ち絵ファイル名</label>
+      <select id="charaPath"></select>
+    </div>
   </div>
+
   <div class="row">
-    <div><label>キャラ名</label><input type="text" id="nameInput" value="ジークフリート"></div>
-    <div><label for="fontFile">フォント選択</label><input type="file" id="fontFile" accept=".otf,.ttf"></div>
+    <div>
+      <label>キャラ名</label>
+      <input type="text" id="nameInput" value="ジークフリート">
+    </div>
+    <div>
+      <label>フォント選択</label>
+      <input type="file" id="fontFile" accept=".otf,.ttf,application/font-sfnt,font/otf,font/ttf">
+    </div>
   </div>
-  <label>メッセージ（--- で区切り / [名前|画像]）</label>
-  <textarea id="msgInput">[ジークフリート|sieg.png]誕生日、おめでとう。
+
+  <label>メッセージ（--- で区切り）</label>
+  <textarea id="msgInput">誕生日、おめでとう。
 ---
-[グラン|gran.png]ありがとうございます、ジークさん。
+あれからもう1年経ったということか、
+ふっ、月日の流れとは早いものだな。
 ---
-また一年、共に進みましょう。</textarea>
-  <div class="row"><button id="playBtn">再生</button></div>
+時にグラン……実はお誕生日の
+さぷらいず、というものを考えて
+来たのだが、受け取ってくれるか？</textarea>
+
+  <div class="row">
+    <button id="playBtn">再生</button>
+  </div>
+
+  <div class="smallNote">
+    画面タップ：途中は全文表示／全文後は次へ。最後まで行くと最初に戻ります。</br）>
+  </div>
 </div>
+
 <button id="miniBtn" title="編集">✎</button>
+
 <script>
-const elBg=document.getElementById("bg"),elChara=document.getElementById("chara"),elName=document.getElementById("nameLayer"),elText=document.getElementById("textLayer"),elHint=document.getElementById("hint"),elUiScale=document.getElementById("uiScale"),windowImg=document.getElementById("windowImg");
-const editor=document.getElementById("editor"),miniBtn=document.getElementById("miniBtn"),bgFile=document.getElementById("bgFile"),charaFile=document.getElementById("charaFile"),fontFile=document.getElementById("fontFile"),nameInput=document.getElementById("nameInput"),msgInput=document.getElementById("msgInput"),playBtn=document.getElementById("playBtn"),tap=document.getElementById("tap"),bgPath=document.getElementById("bgPath"),charaPath=document.getElementById("charaPath");
-let lines=[],idx=0,timer=null,full="",cursor=0,typing=false,baseName="",baseChara="";
-function readAsDataURL(f){return new Promise((r,j)=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=j;fr.readAsDataURL(f)})}
-function parseMessages(raw){const p=raw.split(/\n---\n|^---\n|\n---$|^---$/m).map(s=>s.replace(/\r/g,"").trim()).filter(Boolean);return p.length?p:[""]}
-// 2キャラ対応：行頭 [名前|画像]
-function parseLine(line){
-  const m=line.match(/^\[(.+?)\|(.+?)\]\s*(.*)$/);
-  if(m){return{n:m[1],i:m[2],t:m[3]}}
-  return{n:baseName,i:baseChara,t:line}
+const elBg = document.getElementById("bg");
+const elChara = document.getElementById("chara");
+const elName = document.getElementById("nameLayer");
+const elText = document.getElementById("textLayer");
+const elHint = document.getElementById("hint");
+const elUiScale = document.getElementById("uiScale");
+const windowImg = document.getElementById("windowImg");
+
+const editor = document.getElementById("editor");
+const miniBtn = document.getElementById("miniBtn");
+
+const bgFile = document.getElementById("bgFile");
+const charaFile = document.getElementById("charaFile");
+const fontFile = document.getElementById("fontFile");
+const nameInput = document.getElementById("nameInput");
+const msgInput = document.getElementById("msgInput");
+const playBtn = document.getElementById("playBtn");
+const tap = document.getElementById("tap");
+
+const bgPath = document.getElementById("bgPath");
+const charaPath = document.getElementById("charaPath");
+
+let lines = [], idx = 0, timer = null, full = "", cursor = 0, typing = false;
+let currentName = "";
+let currentChara = "";
+
+function readAsDataURL(file){
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = reject;
+    fr.readAsDataURL(file);
+  });
 }
-async function applyPickedFont(){if(!fontFile.files||!fontFile.files[0])return;const u=URL.createObjectURL(fontFile.files[0]);const ff=new FontFace("NewCinemaAStdD",`url(${u})`);await ff.load();document.fonts.add(ff)}
-function updateUILayout(){const baseW=windowImg.naturalWidth||640;document.documentElement.style.setProperty("--uiBaseW",String(baseW));const s=Math.min(1,window.innerWidth/baseW);elUiScale.style.setProperty("--uiScale",String(s));const r=elUiScale.getBoundingClientRect();document.documentElement.style.setProperty("--uiH",r.height+"px")}
-windowImg.addEventListener("load",updateUILayout);addEventListener("resize",updateUILayout);
-function stopTyping(){if(timer){clearInterval(timer);timer=null}}
-function finishTyping(){stopTyping();elText.textContent=full;typing=false;elHint.style.display="block"}
-function showLine(i){stopTyping();idx=Math.max(0,Math.min(i,lines.length-1));const d=parseLine(lines[idx]||"");elName.textContent=d.n||" ";if(d.i){elChara.src=`./chara/${encodeURIComponent(d.i)}`;elChara.style.display="block"}full=d.t||"";cursor=0;elText.textContent="";typing=true;elHint.style.display="none";timer=setInterval(()=>{cursor++;elText.textContent=full.slice(0,cursor);if(cursor>=full.length)finishTyping()},30)}
-function next(){if(typing){finishTyping();return}idx++;if(idx>=lines.length)idx=0;showLine(idx)}
-function safeName(s){return(s||"").trim().replace(/^\.\/+|^\/+/, "")}
-playBtn.addEventListener("click",async()=>{await applyPickedFont();
- if(bgFile.files&&bgFile.files[0]){elBg.style.backgroundImage=`url("${await readAsDataURL(bgFile.files[0])}")`}else if(bgPath.value){elBg.style.backgroundImage=`url("./bg/${encodeURIComponent(safeName(bgPath.value))}")`}else elBg.style.backgroundImage="none";
- if(charaFile.files&&charaFile.files[0]){elChara.src=await readAsDataURL(charaFile.files[0]);elChara.style.display="block"}else if(charaPath.value){elChara.src=`./chara/${encodeURIComponent(safeName(charaPath.value))}`;elChara.style.display="block"}else{elChara.removeAttribute("src");elChara.style.display="none"}
- baseName=(nameInput.value||"").trim();baseChara=safeName(charaPath.value||"");lines=parseMessages(msgInput.value||"");idx=0;editor.style.display="none";miniBtn.style.display="block";updateUILayout();showLine(0)});
-tap.addEventListener("click",()=>{if(editor.style.display!=="none")return;next()});
-miniBtn.addEventListener("click",()=>{stopTyping();editor.style.display="block";miniBtn.style.display="none";elHint.style.display="none"});
-async function loadList(p){try{const r=await fetch(p,{cache:"no-store"});return r.ok?await r.json():[]}catch(e){return[]}}function fill(sel,arr){sel.innerHTML='<option value="">（なし）</option>';arr.forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)})}
-(async()=>{fill(bgPath,await loadList("./bg/list.json"));fill(charaPath,await loadList("./chara/list.json"))})();
+
+function parseMessages(raw){
+  const blocks = raw
+    .split(/\n---\n|^---\n|\n---$|^---$/m)
+    .map(s => s.replace(/\r/g,"").trim())
+    .filter(Boolean);
+
+  return blocks.map(block => {
+    const lines = block.split("\n");
+    const first = lines[0];
+    const m = first.match(/^\[([^|\]]+)\|([^\]]+)\](.*)$/);
+    if(m){
+      return {
+        name: m[1].trim(),
+        chara: m[2].trim(),
+        text: [m[3], ...lines.slice(1)].join("\n").trim()
+      };
+    }
+    return {
+      name: null,
+      chara: null,
+      text: block
+    };
+  });
+}
+
+async function applyPickedFont(){
+  if(!fontFile.files || !fontFile.files[0]) return;
+  const file = fontFile.files[0];
+  const url = URL.createObjectURL(file);
+  try{
+    const ff = new FontFace("NewCinemaAStdD", `url(${url})`);
+    await ff.load();
+    document.fonts.add(ff);
+  }catch(e){}
+}
+
+/* UIスケール＆UI高さを更新（--uiH を入れる） */
+function updateUILayout(){
+  const baseW = windowImg.naturalWidth || 640;
+  document.documentElement.style.setProperty("--uiBaseW", String(baseW));
+  const s = window.innerWidth / baseW;
+  elUiScale.style.setProperty("--uiScale", String(s));
+  const rect = elUiScale.getBoundingClientRect();
+  document.documentElement.style.setProperty("--uiH", rect.height + "px");
+}
+windowImg.addEventListener("load", updateUILayout);
+addEventListener("resize", updateUILayout);
+
+function stopTyping(){ if(timer){ clearInterval(timer); timer=null; } }
+function finishTyping(){
+  stopTyping();
+  elText.textContent = full;
+  typing = false;
+  elHint.style.display = "block";
+}
+function showLine(i){
+  stopTyping();
+  idx = Math.max(0, Math.min(i, lines.length - 1));
+  const item = lines[idx];
+
+  if(item.name){
+    currentName = item.name;
+    elName.textContent = currentName;
+  }
+  if(item.chara){
+    currentChara = item.chara;
+    elChara.onload = alignHeaderToCharaTop;
+    elChara.src = `./chara/${encodeURIComponent(currentChara)}`;
+    elChara.style.display = "block";
+  }
+
+  full = item.text || "";
+  cursor = 0;
+  elText.textContent = "";
+  typing = true;
+  elHint.style.display = "none";
+  timer = setInterval(() => {
+    cursor++;
+    elText.textContent = full.slice(0, cursor);
+    if(cursor >= full.length) finishTyping();
+  }, 30);
+}
+function next(){
+  if(typing){ finishTyping(); return; }
+  idx++; if(idx >= lines.length) idx = 0;
+  showLine(idx);
+}
+
+function safeName(s){
+  return (s || "").trim().replace(/^\.\/+/, "").replace(/^\/+/, "");
+}
+
+playBtn.addEventListener("click", async () => {
+  await applyPickedFont();
+
+  /* 背景：読み込み優先 → フォルダ指定 */
+  if(bgFile.files && bgFile.files[0]){
+    const u = await readAsDataURL(bgFile.files[0]);
+    elBg.style.backgroundImage = `url("${u}")`;
+  }else{
+    const nm = safeName(bgPath.value);
+    if(nm){
+      elBg.style.backgroundImage = `url("./bg/${encodeURIComponent(nm)}")`;
+    }else{
+      elBg.style.backgroundImage = "none";
+    }
+  }
+
+  /* 立ち絵：読み込み優先 → フォルダ指定 */
+  if(charaFile.files && charaFile.files[0]){
+    const u = await readAsDataURL(charaFile.files[0]);
+    elChara.onload = alignHeaderToCharaTop;
+    elChara.src = u;
+    elChara.style.display = "block";
+    alignHeaderToCharaTop();
+  }else{
+    const nm = safeName(charaPath.value);
+    if(nm){
+      elChara.onload = alignHeaderToCharaTop;
+      elChara.src = `./chara/${encodeURIComponent(nm)}`;
+      elChara.style.display = "block";
+      alignHeaderToCharaTop();
+    }else{
+      elChara.removeAttribute("src");
+      elChara.style.display = "none";
+    }
+  }
+
+  const nm = (nameInput.value || "").trim();
+  currentName = nm;
+  elName.textContent = nm || " ";
+  lines = parseMessages(msgInput.value || "");
+  idx = 0;
+
+  editor.style.display = "none";
+  miniBtn.style.display = "block";
+  updateUILayout();
+  showLine(0);
+});
+
+tap.addEventListener("click", () => {
+  if(editor.style.display !== "none") return;
+  next();
+});
+miniBtn.addEventListener("click", () => {
+  stopTyping();
+  editor.style.display = "block";
+  miniBtn.style.display = "none";
+  elHint.style.display = "none";
+});
+
+// === auto fill selects from list.json ===
+async function __loadList(p){
+  try{ const r=await fetch(p,{cache:"no-store"}); return r.ok?await r.json():[] }catch(e){ return [] }
+}
+function __fill(sel, arr){
+  sel.innerHTML = '<option value="">（なし）</option>';
+  arr.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+}
+(async()=>{
+  if (window.bgPath) __fill(bgPath, await __loadList('./bg/list.json'));
+  if (window.charaPath) __fill(charaPath, await __loadList('./chara/list.json'));
+})();
+
+
+function alignHeaderToCharaTop(){
+  const header = document.getElementById("header");
+  const chara  = document.getElementById("chara");
+  if(!header || !chara) return;
+
+  const r = chara.getBoundingClientRect();
+  if(!isFinite(r.top) || r.height === 0) return;
+
+  header.style.transform = `translateY(${r.top}px)`;
+}
+window.addEventListener("load", alignHeaderToCharaTop);
+window.addEventListener("resize", alignHeaderToCharaTop);
+
 </script>
 </body>
 </html>
