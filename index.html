@@ -303,10 +303,7 @@ button{
       <label>キャラ名</label>
       <input type="text" id="nameInput" value="ジークフリート">
     </div>
-    <div>
-      <label>フォント選択</label>
-      <input type="file" id="fontFile" accept=".otf,.ttf,application/font-sfnt,font/otf,font/ttf">
-    </div>
+    
   </div>
 
   <label>メッセージ（--- で区切り）</label>
@@ -379,7 +376,7 @@ function parseMessages(raw){
   return blocks.map(block => {
     const lines = block.split("\n");
     const first = lines[0];
-    const m = first.match(/^\[([^|\]]+)\|([^\]]+)\](.*)$/);
+    const m = first.match(/^\[([^|\]]*)\|([^\]]*)\](.*)$/);
     if(m){
       return {
         name: m[1].trim(),
@@ -430,33 +427,37 @@ function showLine(i){
   idx = Math.max(0, Math.min(i, lines.length - 1));
   const item = lines[idx];
 
-  if(item.name){
+  if(item.name !== null){
     currentName = item.name;
   }
-  if(item.chara){
+  if(item.chara !== null){
     currentChara = item.chara;
   }
 
-  // fallback to current editor selection if no tag
-  if(!item.name){
+  // fallback only when tag does not exist
+  if(item.name === null){
     const file = charaPath.value;
     if(file){
       if(file.startsWith("gran")) currentName = "グラン";
       else if(file.startsWith("sieg")) currentName = "ジークフリート";
+    }else{
+      currentName = "";
     }
   }
-  if(!item.chara){
+  if(item.chara === null){
     const file = charaPath.value;
     if(file) currentChara = file;
+    else currentChara = "";
   }
 
-  if(currentName){
-    elName.textContent = currentName;
-  }
+  elName.textContent = currentName || "";
   if(currentChara){
     elChara.onload = alignHeaderToCharaTop;
     elChara.src = `./chara/${encodeURIComponent(currentChara)}`;
     elChara.style.display = "block";
+  }else{
+    elChara.removeAttribute("src");
+    elChara.style.display = "none";
   }
 
   full = item.text || "";
@@ -599,4 +600,3 @@ window.addEventListener("resize", alignHeaderToCharaTop);
 </script>
 </body>
 </html>
-
